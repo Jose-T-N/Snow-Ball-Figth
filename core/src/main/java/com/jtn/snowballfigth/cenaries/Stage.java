@@ -37,6 +37,8 @@ public class Stage extends Scenario {
 			enemy.update(delta);
 		}
 
+        ui.update();
+
 	}
 
 	@Override
@@ -90,6 +92,12 @@ public class Stage extends Scenario {
             // shot
             if (Gdx.input.isKeyJustPressed(Input.Keys.Z))
                 ((Player) player).shot();
+            // mudar item selecionado
+            if (Gdx.input.isKeyJustPressed(Input.Keys.C))
+                ui.getItensHero().changeItem();
+            // Usar item
+            if (Gdx.input.isKeyJustPressed(Input.Keys.V))
+                ui.getItensHero().useItem();
         }
 
 	}
@@ -100,6 +108,11 @@ public class Stage extends Scenario {
         for (Enemy e : enemys){
             e.dispose();
         }
+    }
+
+    @Override
+    public void shapeDraw(float delta) {
+        ui.shapeDraw();
     }
 
     public UI getUi() {

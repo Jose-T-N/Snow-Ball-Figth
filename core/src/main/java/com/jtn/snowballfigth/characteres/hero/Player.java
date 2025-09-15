@@ -38,7 +38,12 @@ public class Player implements Hero{
 	private float timer_walk,timer_attack;
     private UI ui;
     private Hero_Life heroLife;
-    private boolean destring, lastAnimation;;
+    private boolean destring, lastAnimation;
+
+    /**
+     *Bousa do player
+     */
+    private Bag bag;
 
 	public Player(PlayScreen screen) {
 
@@ -93,6 +98,8 @@ public class Player implements Hero{
 
         // Verifica se o jogador ainda tem life
         destring = false;
+        //Bousa de itens do player
+        bag =  Bag.getContext(this);
 
 	}
 
@@ -202,7 +209,7 @@ public class Player implements Hero{
 			powerBarOn = false;
 			bullets.add(new Bullet(this, screen,
                     //Cria ump parelelo entre ate onde o tiro pode ir e o numero de bolas na powerbar
-					Map.map(power.getPower(), 0, 1.6f, ((Main.V_HEIGHT/Main.PPM)/2f) - 30f /Main.PPM, ((Main.V_HEIGHT / 2f) + 50f) / Main.PPM)));
+					Map.map(power.getPower(), 0, 1.6f, ((Main.V_HEIGHT/Main.PPM)/2f) - 50f /Main.PPM, ((Main.V_HEIGHT / 2f) + 50f) / Main.PPM)));
 			power.reset();
 			mov = Movs.STOP;
 		}
@@ -274,5 +281,21 @@ public class Player implements Hero{
 
     public boolean isDestring() {
         return destring;
+    }
+
+    /**
+     * @return Retorna os itens que o player tem
+     */
+    public Bag getBag() {
+        return bag;
+    }
+
+    public void setLife(float life) {
+        this.life = life;
+    }
+
+    public Hero_Life getHeroLife() {
+        heroLife = stage.getUi().getHeroLife();
+        return heroLife;
     }
 }

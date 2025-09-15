@@ -1,6 +1,9 @@
 package com.jtn.snowballfigth.characteres.hero;
 
 import com.badlogic.gdx.physics.box2d.Body;
+import com.jtn.snowballfigth.itens.Item;
+
+import java.util.ArrayList;
 
 public interface Hero {
 

@@ -1,5 +1,6 @@
 package com.jtn.snowballfigth.util;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,6 +20,7 @@ public class UI {
     // SpriteBatch
     private SpriteBatch batch;
     private Hero_Life heroLife;
+    private Itens_Hero itensHero;
 
     /***
      * Cria a imagem da UI do jogador nos estagios
@@ -39,10 +41,21 @@ public class UI {
         ui = new Texture("util/ui.png");
         this.heroLife = new Hero_Life(this, player);
 
+        this.itensHero = new Itens_Hero(screen);
+
     }
     public void draw(){
         batch.draw(ui, 0, 0, width, height );
         heroLife.draw();
+        itensHero.draw();
+    }
+
+    public void shapeDraw(){
+        itensHero.shapeDraw();
+    }
+
+    public void update(){
+        itensHero.update();
     }
 
     public SpriteBatch getBatch() {
@@ -60,4 +73,9 @@ public class UI {
     public Hero_Life getHeroLife() {
         return heroLife;
     }
+
+    public Itens_Hero getItensHero() {
+        return itensHero;
+    }
+
 }

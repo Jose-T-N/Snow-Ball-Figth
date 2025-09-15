@@ -208,4 +208,8 @@ public abstract class PlayScreen implements Screen {
     public SpriteBatch getBatch() {
         return batch;
     }
+
+    public ShapeRenderer getShape() {
+        return shape;
+    }
 }

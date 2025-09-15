@@ -25,8 +25,8 @@ public class PlayerIcon implements Hero {
 	private boolean drawPlayer;
 	//Quantia de dinheiro do jogador
 	private int maney;
-	private ArrayList<Item> itens;
     private float life;
+    private ArrayList<Item> itens;
 
 	public PlayerIcon(PlayScreen screen) {
 
@@ -45,7 +45,7 @@ public class PlayerIcon implements Hero {
 		this.maney = 50;
 
 		//Lista de itens
-		itens = new ArrayList<>();
+		itens = Bag.getContext(this).getItens();
 
 	}
 	/**

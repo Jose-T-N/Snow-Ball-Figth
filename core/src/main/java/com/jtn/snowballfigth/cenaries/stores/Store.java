@@ -71,6 +71,8 @@ public abstract class Store extends Scenario {
 
 	@Override
 	public void fontDraw(float delta) {
+        // Preço do item selecionado
+        font.draw(batch, String.valueOf(list[HorizontalCount].getPrice()), 105f, 19f);
 		// Texto com a quantidade de dinheiro do jogador
 		font.draw(batch, String.valueOf(((PlayerIcon) player).getManey()), 245f, 19f);
 		// Menssagem de "Dinheiro Insuficiente"
@@ -108,6 +110,11 @@ public abstract class Store extends Scenario {
 		}
 
 	}
+
+    /**
+     * Desenha o quadrado do item selecionado
+     * @param delta delta time
+     */
 
 	@Override
 	public void shapeDraw(float delta) {
@@ -230,7 +237,7 @@ public abstract class Store extends Scenario {
 
 	/**
 	 * menssagem de "Dinheiro Insuficiente"
-	 * 
+	 *
 	 * @param msg
 	 *            valor boolean
 	 */
@@ -244,7 +251,7 @@ public abstract class Store extends Scenario {
 
 	/**
 	 * menssagem de "Item Duplicado"
-	 * 
+	 *
 	 * @param msg
 	 *            valor boolean
 	 */
@@ -258,7 +265,7 @@ public abstract class Store extends Scenario {
 
 	/**
 	 * menssagem de "Item Duplicado"
-	 * 
+	 *
 	 * @param msg
 	 *            valor boolean
 	 */
