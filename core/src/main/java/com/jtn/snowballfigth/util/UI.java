@@ -1,6 +1,5 @@
 package com.jtn.snowballfigth.util;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,6 +7,7 @@ import com.jtn.snowballfigth.Main;
 import com.jtn.snowballfigth.cenaries.Stage;
 import com.jtn.snowballfigth.characteres.hero.Hero_Life;
 import com.jtn.snowballfigth.characteres.hero.Player;
+import com.jtn.snowballfigth.characteres.hero.PowerEnergy;
 import com.jtn.snowballfigth.screens.PlayScreen;
 
 public class UI {
@@ -21,13 +21,14 @@ public class UI {
     private SpriteBatch batch;
     private Hero_Life heroLife;
     private Itens_Hero itensHero;
+    private PowerEnergy power;
 
     /***
      * Cria a imagem da UI do jogador nos estagios
      * @param screen estagio onde a UI sera renderizada
      */
     public UI( Stage screen) {
-        this.lifeValue = lifeValue;
+        //this.lifeValue = lifeValue;
         this.width = (Main.V_WIDTH/Main.PPM);
         this.height = ((Main.V_HEIGHT/Main.PPM) / 4f) - (20f/Main.PPM);
         this.x = 0;
@@ -43,11 +44,15 @@ public class UI {
 
         this.itensHero = new Itens_Hero(screen);
 
+        //Energia do poder
+        power = new PowerEnergy(this,player);
+
     }
     public void draw(){
         batch.draw(ui, 0, 0, width, height );
         heroLife.draw();
         itensHero.draw();
+        power.draw();
     }
 
     public void shapeDraw(){
@@ -56,6 +61,24 @@ public class UI {
 
     public void update(){
         itensHero.update();
+    }
+
+    /**
+     * Almenta a energia do poder do jogador
+     * @param pe powerEnergy
+     */
+    public void increasePowerEnergy(float pe){
+        if (screen.getGame().getEnergyPower() < PowerEnergy.MAX_POWER) {
+            ((Player) screen.getPlayer()).setPowerEnergy(screen.getGame().getEnergyPower() + pe);
+            ((Stage)screen).getUi().getPower().setPowerEnergy(screen.getGame().getEnergyPower());
+        }
+        else {
+            ((Player) screen.getPlayer()).setPowerEnergy(PowerEnergy.MAX_POWER);
+            ((Stage)screen).getUi().getPower().setPowerEnergy(screen.getGame().getEnergyPower());
+            //System.out.println("else");
+        }
+
+        //((Player) screen.getPlayer()).setPowerEnergy(screen.getGame().getEnergyPower());
     }
 
     public SpriteBatch getBatch() {
@@ -78,4 +101,11 @@ public class UI {
         return itensHero;
     }
 
+    public PowerEnergy getPower() {
+        return power;
+    }
+
+    public PlayScreen getScreen() {
+        return screen;
+    }
 }

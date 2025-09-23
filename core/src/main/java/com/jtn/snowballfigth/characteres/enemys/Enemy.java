@@ -17,13 +17,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Disposable;
 import com.jtn.snowballfigth.Main;
-import com.jtn.snowballfigth.characteres.hero.Hero;
+import com.jtn.snowballfigth.cenaries.Stage;
+import com.jtn.snowballfigth.characteres.hero.PowerEnergy;
 import com.jtn.snowballfigth.itens.bullets.Bullet;
 import com.jtn.snowballfigth.screens.PlayScreen;
 import com.jtn.snowballfigth.tools.TimerCount;
 import com.jtn.snowballfigth.util.LifeBar;
-import com.jtn.snowballfigth.util.Map;
-import com.jtn.snowballfigth.util.PowerBar;
 
 public class Enemy implements Disposable {
 
@@ -72,6 +71,10 @@ public class Enemy implements Disposable {
     // --------------------------------------------------------------------------
     private final float LIMITER_BOTTON = ((Main.V_HEIGHT/Main.PPM)/2f) + 10f /Main.PPM; ;
     private final float LIMITER_TOP = ((Main.V_HEIGHT/Main.PPM)/2f) + 40f /Main.PPM;
+    //Criar um blink na imagem do inimigo
+    private boolean imageOn, blinkOn;
+    private int timesBlink;
+    private TimerCount blinkDelay;
 
     /**
      * dano da bola de neve do inimigo
@@ -140,7 +143,7 @@ public class Enemy implements Disposable {
 		lifeBarOn = true;
 		//valor da vida
 		max_life = LifeBar.getMAX_LIFE();
-		life = max_life;
+		life = 0.5f;
         //----------------------------------------------------------------------
         // ----------------- Contador de tempo entre um tiro e outro ----------------------
         //--------------------------------------------------------------
@@ -151,7 +154,12 @@ public class Enemy implements Disposable {
         //--------------------------------------------------------------
         steepDelayTime = TimerCount.randomFloatNumber(FIRST_TIME_STEEP,SECOND_TIME_STEEP);
         steepDelayTimeCount = new TimerCount();
-
+        //Configura que pode mostra a imagem
+        imageOn = true;
+        //Vezes que imagem piscou
+        timesBlink = 0;
+        //contador de delay do efeito de blink
+        blinkDelay = new TimerCount();
 	}
 
 	/**
@@ -161,22 +169,24 @@ public class Enemy implements Disposable {
 		if (drawPlayer) {
 			// Caso o player esteja em movimento a animacao e atualizada.
 			// Caso parado a animacao para.
-			if (mov != Movs.ATTACK && mov != Movs.DEAD && mov == Movs.DEFALT) {
-				//defalt
-				batch.draw(enemy.getKeyFrame(timer_defalt, true), b2body.getPosition().x - w / 2,
-						b2body.getPosition().y - (h / 4) - 5f / Main.PPM, w, h);
-				timer_defalt += delta;
+            if (imageOn) {
+                if (mov != Movs.ATTACK && mov != Movs.DEAD && mov == Movs.DEFALT) {
+                    //defalt
+                    batch.draw(enemy.getKeyFrame(timer_defalt, true), b2body.getPosition().x - w / 2,
+                        b2body.getPosition().y - (h / 4) - 5f / Main.PPM, w, h);
+                    timer_defalt += delta;
 
-			} else if(mov == Movs.ATTACK && mov != Movs.DEAD) {
-				//ataque
-				batch.draw(dead.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
-						b2body.getPosition().y - h / 2, w, h);
-				timer_attack += delta;
-			}else if(mov != Movs.ATTACK && mov == Movs.DEAD && lastAnimation) {
-				//morto
-				batch.draw(dead.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
-						b2body.getPosition().y - h / 2, w, h);
-			}
+                } else if (mov == Movs.ATTACK && mov != Movs.DEAD) {
+                    //ataque
+                    batch.draw(dead.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
+                        b2body.getPosition().y - h / 2, w, h);
+                    timer_attack += delta;
+                } else if (mov != Movs.ATTACK && mov == Movs.DEAD && lastAnimation) {
+                    //morto
+                    batch.draw(dead.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
+                        b2body.getPosition().y - h / 2, w, h);
+                }
+            }
 		}
 		for (Bullet bullet : bullets) {
             bullet.draw();
@@ -309,6 +319,51 @@ public class Enemy implements Disposable {
 				destroyed = true;
 			}
 		}
+        ///  Configura o efeito de blink
+        if (blinkOn && !destring){
+            /// Atualiza o contador do delay do blink
+            /// Caso o contador atinga o limite
+            blinkDelay.update();
+            //No inicio do efeito
+            //O personagem desliga imediatamente
+            if (timesBlink == 0) {
+                timesBlink += 1;
+                if (blinkDelay.getTimer() >= 0) {
+                    /// se a imagem estiver ligada e desligada
+                    /// se a imagem estiver desligada e ligada
+                    imageOn = !imageOn;
+                    //Reseta o contador
+                    blinkDelay.resetTimer();
+                    /// adiciona 1 ao contador de piscada
+                    //System.out.println("blick " + imageOn);
+                    //Caso o numero de piscadas for atingido o efeito acaba
+                    if (timesBlink >= 4) {
+                        blinkOn = false;
+                        imageOn = true;
+                        timesBlink = 0;
+                        //System.out.println("fim");
+                    }
+                }
+            }
+            else {
+                if (blinkDelay.getTimer() >= .2f) {
+                    /// se a imagem estiver ligada e desligada
+                    /// se a imagem estiver desligada e ligada
+                    imageOn = !imageOn;
+                    //Reseta o contador
+                    blinkDelay.resetTimer();
+                    /// adiciona 1 ao contador de piscadas
+                    timesBlink += 1;
+                    //System.out.println("blick " + imageOn);
+                    //Caso o numero de piscadas for atingido o efeito acaba
+                    if (timesBlink >= 4) {
+                        blinkOn = false;
+                        imageOn = true;
+                        timesBlink = 0;
+                    }
+                }
+            }
+        }
 	}
 	/**
 	 * Quando o inimigo e acertado
@@ -319,7 +374,8 @@ public class Enemy implements Disposable {
         //----------------------------------------------------
 		life -= shoot_point - resistance;
         lifeBar.setLife(life);
-        //System.out.println(this.life);
+        ((Stage)screen).getUi().increasePowerEnergy(PowerEnergy.POWER_HIT);
+        blinkOn();
 		if(life <= 0)
 			dead();
 
@@ -330,6 +386,9 @@ public class Enemy implements Disposable {
 	private void dead(){
 		this.mov = Movs.DEAD;
 		destring = true;
+
+        ((Stage)(screen)).getUi().increasePowerEnergy(screen.getGame().getEnergyPower() + (PowerEnergy.POWER_HIT));
+
 	}
 
 	/**
@@ -407,5 +466,16 @@ public class Enemy implements Disposable {
         return life;
     }
 
-
+    /**
+    * Liga a funcao de blink do inimigo
+     */
+    public void blinkOn() {
+        blinkOn = true;
+    }
+    /**
+     * Mostra se o inigo ainda esta vivo
+     */
+    public boolean isDestroyed() {
+        return destroyed;
+    }
 }

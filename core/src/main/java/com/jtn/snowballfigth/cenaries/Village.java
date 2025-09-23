@@ -3,6 +3,7 @@ package com.jtn.snowballfigth.cenaries;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -17,6 +18,10 @@ public class Village extends Scenario {
 	 * Imagem que indica que o cenario estao fechado
 	 */
 	private Texture closeStage;
+    /**
+     * Imagem que indica que o cenario estao abertos
+     */
+    private TextureRegion[] openStages;
 	/**
 	 * Imagem que tapa a bandeira
 	 */
@@ -54,7 +59,15 @@ public class Village extends Scenario {
 	 */
 	public Village(Main main) {
 
-		super(new Texture("scenario/village.png"), main,true);
+		super(new Texture("scenario/village_no_schools.png"), main,true);
+        //Imagens das escolas desbloqueadas
+        this.openStages = new TextureRegion[4];
+        //Percorre toda sprite separando as imagens
+        Texture t = new Texture("scenario/schools_unlocked.png");
+        for (int i = 0 ; i < 4; i++){
+            openStages[i] = new TextureRegion(t,i* (t.getWidth()/4),0,(t.getWidth()/4),t.getHeight());
+        }
+
 		this.closeStage = new Texture("scenario/school.png");
 		this.groundTx = new Texture("scenario/ground-bg.png");
 		this.snowTx = new Texture("scenario/snow-bg.png");
@@ -150,29 +163,41 @@ public class Village extends Scenario {
 	 */
 
 	private void drawCloseStages() {
+        batch.draw(openStages[3], 300f / Main.PPM, 84f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
 		// Desenha enqunto o segundo estagio estiver bloqueado
 		if (!stage2) {
 			// Segundo estagio estagio
 			batch.draw(closeStage, 206f / Main.PPM, 31f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
 			// Tapando a bandeira
-			batch.draw(groundTx, 230f / Main.PPM, 64f / Main.PPM, 27f / Main.PPM, 9f / Main.PPM);
+			//batch.draw(groundTx, 230f / Main.PPM, 64f / Main.PPM, 27f / Main.PPM, 9f / Main.PPM);
 		}
+        //Quando o Segundo estagio estiver liberado
+        else {
+            batch.draw(openStages[2], 206f / Main.PPM, 31f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
+        }
 		// Desenha enqunto o terceiro estagio estiver bloqueado
 		if (!stage3) {
 			// Terceiro estagio estagio
 			batch.draw(closeStage, 115f / Main.PPM, 31f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
 			// Tapando a bandeira
-			batch.draw(groundTx, 145f / Main.PPM, 64f / Main.PPM, 22f / Main.PPM, 9f / Main.PPM);
+			//batch.draw(groundTx, 145f / Main.PPM, 64f / Main.PPM, 22f / Main.PPM, 9f / Main.PPM);
 
 		}
+        //Quando o Segundo estagio estiver liberado
+        else {
+            batch.draw(openStages[1], 115f / Main.PPM, 31f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
+        }
 		// Desenha enqunto o quarto estagio estiver bloqueado
 		if (!stage4) {
 			// Quarto estagio estagio
 			batch.draw(closeStage, 22f / Main.PPM, 84f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
 			// Tapando a bandeira
-			batch.draw(snowTx, 52f / Main.PPM, 117f / Main.PPM, 20f / Main.PPM, 9f / Main.PPM);
+			//batch.draw(snowTx, 52f / Main.PPM, 117f / Main.PPM, 20f / Main.PPM, 9f / Main.PPM);
 		}
-
+        //Quando o Segundo estagio estiver liberado
+        else {
+            batch.draw(openStages[0], 22f / Main.PPM, 84f / Main.PPM, 74f / Main.PPM, 35f / Main.PPM);
+        }
 	}
 
 	/**
@@ -267,7 +292,7 @@ public class Village extends Scenario {
 	 * Verifica se o jogador tocou a porta do primeiro estagio
 	 */
 	public void stage1() {
-        this.game.setScenario(new Stage(game));
+        this.game.setScenario(new StageInfo(game.getStage1(),game));
 		this.game.setScreen(this.game.getScenario());
 		//System.out.println("did");
 	}
@@ -345,5 +370,10 @@ public class Village extends Scenario {
 
 		return body;
 	}
+
+    public void reset(){
+        player.getB2body().setTransform((Main.V_WIDTH/ Main.PPM)/2f,(Main.V_HEIGHT/ Main.PPM)/2f,0);
+    }
+
 
 }

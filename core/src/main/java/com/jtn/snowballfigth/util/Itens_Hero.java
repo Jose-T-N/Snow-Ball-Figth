@@ -131,7 +131,7 @@ public class Itens_Hero {
     boolean isBlink = true;
     public void shapeDraw() {
         //Faz um efeito o seletor ficar piscando
-        if (blink.getTimer() >=.02f){
+        if (blink.getTimer() >=.5f){
             if (isBlink){
                 shape.setColor(Color.GREEN);
                 isBlink = false;

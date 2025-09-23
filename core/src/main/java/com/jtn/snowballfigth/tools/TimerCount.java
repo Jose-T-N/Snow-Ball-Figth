@@ -15,8 +15,8 @@ public class TimerCount {
 
 		dt +=  Gdx.graphics.getDeltaTime();
 
-		if(dt >= 0.5f) {
-			timer += 0.5f;
+		if(dt >= 0.1f) {
+			timer += 0.1f;
 			dt = 0;
 		}
 

@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.jtn.snowballfigth.cenaries.Scenario;
+import com.jtn.snowballfigth.cenaries.StageInfo;
 import com.jtn.snowballfigth.cenaries.Village;
+import com.jtn.snowballfigth.screens.PlayScreen;
 
 public class Main extends Game {
 
@@ -35,7 +37,16 @@ public class Main extends Game {
 	public static final short SHOOT = 512;
     public static final short BULLET_ENEMY = 1024;
 
-    private Scenario scenario;
+    private PlayScreen scenario;
+
+    //A energia do poder do player que se manten depois dos estagio
+    private float energyPower ;
+    private int stage1;
+    private int stage2;
+    private int stage3;
+    private int stage4;
+    //Vila
+    private Village village;
 
 	@Override
 	public void create() {
@@ -43,10 +54,18 @@ public class Main extends Game {
 		batchFont = new SpriteBatch();
 		shape = new ShapeRenderer();
 
+        stage1 = StageInfo.STAGE1_1;
+        stage2 = StageInfo.STAGE1_2;
+        stage3 = StageInfo.STAGE1_3;
+        stage4 = StageInfo.STAGE1_4;
+
 		font = new BitmapFont(Gdx.files.internal("fonts/font.fnt"));
 
-        scenario = new Village(this);
+        this.village = new Village(this);
+        scenario = village;
         setScreen(scenario);
+        //Valor inicial da enegia do poder
+        energyPower = 0;
 
 	}
 
@@ -61,11 +80,11 @@ public class Main extends Game {
         scenario.dispose();
 	}
 
-    public Scenario getScenario() {
+    public PlayScreen getScenario() {
         return scenario;
     }
 
-    public void setScenario(Scenario scenario) {
+    public void setScenario(PlayScreen scenario) {
         this.scenario = scenario;
     }
 
@@ -73,4 +92,42 @@ public class Main extends Game {
 		setScreen(screen);
 	}
 
+    public float getEnergyPower() {
+        return energyPower;
+    }
+
+    public void setEnergyPower(float energyPower) {
+        this.energyPower = energyPower;
+    }
+    /**
+     * Informa a faze do estagio 1 em que player esta
+     */
+    public int getStage1() {
+        return stage1;
+    }
+    /**
+     * Informa a faze do estagio 2 em que player esta
+     */
+    public int getStage2() {
+        return stage1;
+    }
+    /**
+     * Informa a faze do estagio 3 em que player esta
+     */
+    public int getStage3() {
+        return stage1;
+    }
+    /**
+     * Informa a faze do estagio 4 em que player esta
+     */
+    public int getStage4() {
+        return stage1;
+    }
+    /**
+     * Vilarejo
+     */
+    public Village getVillage() {
+        village.reset();
+        return village;
+    }
 }

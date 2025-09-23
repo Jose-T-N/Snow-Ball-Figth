@@ -2,6 +2,7 @@ package com.jtn.snowballfigth.characteres.hero;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -13,8 +14,13 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Disposable;
 import com.jtn.snowballfigth.Main;
 import com.jtn.snowballfigth.cenaries.Stage;
+import com.jtn.snowballfigth.characteres.hero.special.Dragon;
+import com.jtn.snowballfigth.characteres.hero.special.Mountain;
+import com.jtn.snowballfigth.characteres.hero.special.SnowMan;
+import com.jtn.snowballfigth.characteres.hero.special.Special;
 import com.jtn.snowballfigth.itens.bullets.Bullet;
 import com.jtn.snowballfigth.screens.PlayScreen;
+import com.jtn.snowballfigth.tools.TimerCount;
 import com.jtn.snowballfigth.util.Map;
 import com.jtn.snowballfigth.util.PowerBar;
 import com.jtn.snowballfigth.util.UI;
@@ -39,17 +45,33 @@ public class Player implements Hero{
     private UI ui;
     private Hero_Life heroLife;
     private boolean destring, lastAnimation;
+    private float powerEnergy;
 
     /**
      *Bousa do player
      */
     private Bag bag;
+    private boolean blinkOn;
+    private TimerCount blinkDelay;
+    private int timesBlink;
+    private boolean imageOn;
+    //-------------------------------------
+    // --- Animacao de vitoria ------------
+    //-------------------------------------
+    private boolean victory;
+    private Texture victoryTexture,vTexture;
+    private TimerCount victoryCount;
+    //Tamanhos e posicoes da mao fazendo "V"
+    private float xv,yv,wv,hv;
+    /// Indica fim do estagio com vitoria
+    private boolean endAnimationVictory,end;
 
-	public Player(PlayScreen screen) {
+    public Player(PlayScreen screen) {
 
 		world = screen.world;
 		this.screen = screen;
         this.stage = (Stage)screen;
+        this.ui = this.stage.getUi();
 
 		this.batch = screen.batch;
 		// Imagem do heroi
@@ -100,45 +122,94 @@ public class Player implements Hero{
         destring = false;
         //Bousa de itens do player
         bag =  Bag.getContext(this);
-
+        //Energia do poder do jogador
+        powerEnergy = screen.getGame().getEnergyPower();
+        //Efeitos de blink
+        imageOn = true;
+        blinkOn = false;
+        blinkDelay = new TimerCount();
+        timesBlink = 0;
+        /// -----------------------------------------------------
+        /// Texturas e configuracoes da comemoracao do jogado
+        /// ---------------------------------------------------
+        victoryTexture = new Texture("characteres/hero/hero-vic.png");
+        vTexture = new Texture("characteres/hero/v.png");
+        victoryCount = new TimerCount();
+        /// Posicoes e tamanhos da mao fazendo v
+        wv = (float) vTexture.getWidth() /Main.PPM ;
+        hv = (float) vTexture.getHeight() /Main.PPM ;
+        /// Indica o final da animacao de vitoria
+        endAnimationVictory = false;
+        end = false;
 	}
 
 	/**
 	 * Desenha os graficos da jogador
 	 */
 	public void draw(float delta) {
-		if (drawPlayer && !lastAnimation) {
-			// Caso o player esteja em movimento a animacao e atualizada.
-			// Caso parado a animacao para.
-			if (mov != Movs.ATTACK) {
-				if (mov == Movs.WALK) {
-					timer_walk += Gdx.graphics.getDeltaTime();
-				}
-				batch.draw(player.getKeyFrame(timer_walk, true), b2body.getPosition().x - w / 2,
-						b2body.getPosition().y - h / 2, w, h);
-			} else {
-				batch.draw(attack.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
-						b2body.getPosition().y - h / 2, w, h);
-				timer_attack += delta;
-			}
-            //----------------------------------------------------------------------------
-            // --------------- Animação de morte do protagonista -------------------------
-            //----------------------------------------------------------------------------
-		}else if(drawPlayer && lastAnimation){
-            this.w = 27f / Main.PPM;
-            this.h = 18f / Main.PPM;
-            batch.draw(dead.getKeyFrame(0, true), b2body.getPosition().x - w / 2,
-                b2body.getPosition().y - h / 2, w, h);
-            //timer_attack += delta;
+        //Caso o jogador ainda não tenha ganhado
+        if(!victory) {
+            if (drawPlayer && !lastAnimation) {
+                // Caso o player esteja em movimento a animacao e atualizada.
+                // Caso parado a animacao para.
+                if (imageOn) {
+                    if (mov != Movs.ATTACK) {
+                        if (mov == Movs.WALK) {
+                            timer_walk += Gdx.graphics.getDeltaTime();
+                        }
+                        batch.draw(player.getKeyFrame(timer_walk, true), b2body.getPosition().x - w / 2,
+                            b2body.getPosition().y - h / 2, w, h);
+                    } else {
+                        batch.draw(attack.getKeyFrame(timer_attack, true), b2body.getPosition().x - w / 2,
+                            b2body.getPosition().y - h / 2, w, h);
+                        timer_attack += delta;
+                    }
+                }
+                /// ---------------------------------------------------------------------------
+                /// --------------- Animação de morte do protagonista -------------------------
+                /// ---------------------------------------------------------------------------
+            } else if (drawPlayer && lastAnimation) {
+                this.w = 27f / Main.PPM;
+                this.h = 18f / Main.PPM;
+                batch.draw(dead.getKeyFrame(0, true), b2body.getPosition().x - w / 2,
+                    b2body.getPosition().y - h / 2, w, h);
+                //timer_attack += delta;
+            }
         }
-		for (Bullet bullet : bullets) {
-			bullet.draw();
-		}
-		if (powerBarOn && !destring) {
-			power.draw();
-		}
-	}
+        else {
+            //Posicoes da mao fazendo "V"
+            xv = b2body.getPosition().x + (w - 19f / Main.PPM);
+            yv = b2body.getPosition().y - (h / 2) + (6f / Main.PPM);
+            //Faz a mao em forma de "V" crescer
+            float increaseHand = 0.001f;
+            //Desenaha a comoracao do jogador
+            batch.draw(victoryTexture, b2body.getPosition().x - w / 2, b2body.getPosition().y - h / 2, w, h);
+            //Desenaha a mao fazendo v na comemoracao
+            batch.draw(vTexture, xv, yv, wv, hv);
+            //Atuliza o contador que faz a contagem para o fim da animacao
+            victoryCount.update();
+            //System.out.println(victoryCount.getTimer());
+            if (!endAnimationVictory && victoryCount.getTimer() <= 1f) {
+                wv += increaseHand;
+                hv += increaseHand;
+            }
+            //Verifica se chegou no fim do tempo
+            else if (victoryCount.getTimer() >= 1f && victoryCount.getTimer() <4f) {
+                endAnimationVictory = true;
 
+            }
+            else if (victoryCount.getTimer() >= 4f){
+                end = true;
+                System.out.println("fim");
+            }
+        }
+        for (Bullet bullet : bullets) {
+            bullet.draw();
+        }
+        if (powerBarOn && !destring && !victory) {
+            power.draw();
+        }
+	}
 	/**
 	 * Atuliza as infomacoes do Jogador e derivados
 	 */
@@ -146,7 +217,7 @@ public class Player implements Hero{
         ///----------------------------------------------------------------
         /// ------------- Enquanto o jogador ainda estiver vivo -----------
         /// ---------------------------------------------------------------
-        if(!destring) {
+        if(!destring){
             for (int i = 0; i < bullets.size(); i++) {
                 bullets.get(i).update();
                 if (bullets.get(i).isDestroyed()) {
@@ -158,18 +229,17 @@ public class Player implements Hero{
             lastAnimation = true;
             b2body.setLinearVelocity(0,0);
         }
-
+        blink();
 	}
-
 	/**
 	 * Se for igual a false apagara o jogador da tela
 	 *
 	 * @param drawPlayer
-	 */
+     *
+     * */
 	public void setDrawPlayer(boolean drawPlayer) {
 		this.drawPlayer = drawPlayer;
 	}
-
 	/**
 	 * Cria o corpo fisico do jogador
 	 */
@@ -194,11 +264,10 @@ public class Player implements Hero{
         Fixture fixture = this.b2body.createFixture(fdef);
         fixture.setUserData(this);
     }
-
 	/**
 	 * Mosta a PowerBar depois execulta o tiro
 	 */
-	public void shot() {
+	public void shoot() {
 		// Mosta o Powerbar
 		if (!powerBarOn) {
 			powerBarOn = true;
@@ -220,7 +289,6 @@ public class Player implements Hero{
 		// TODO Auto-generated method stub
 		return b2body;
 	}
-
     /**
      * Retorna os pontos de vida do jogador
      * @return pontos de vida do jogador
@@ -255,6 +323,7 @@ public class Player implements Hero{
         life -= shoot;
 
         heroLife.setLife(life);
+        blinkOn();
 
         if(life <= 0){
             destring = true;
@@ -297,5 +366,94 @@ public class Player implements Hero{
     public Hero_Life getHeroLife() {
         heroLife = stage.getUi().getHeroLife();
         return heroLife;
+    }
+    /**
+     * Configura a energia do poder do player
+     */
+    public void setPowerEnergy(float pe) {
+        screen.getGame().setEnergyPower(pe);
+        this.powerEnergy = pe;
+    }
+    /**
+     * Cria o especial de acordo com a energia do jogador
+     */
+    public Special special(){
+        if (powerEnergy >= Special.SPECIAL1 && powerEnergy < Special.SPECIAL2 ){
+            return new Mountain(this);
+        }
+        else if (powerEnergy >= Special.SPECIAL2 && powerEnergy < Special.SPECIAL3){
+            return new  Dragon(this);
+        }
+        else if (powerEnergy >= Special.SPECIAL3){
+            return new SnowMan(this);
+        }
+        return null;
+    }
+    public void blink(){
+        ///  Configura o efeito de blink
+        if (blinkOn && !destring){
+            /// Atualiza o contador do delay do blink
+            /// Caso o contador atinga o limite
+            blinkDelay.update();
+            //No inicio do efeito
+            //O personagem desliga imediatamente
+            if (timesBlink == 0) {
+                timesBlink += 1;
+                if (blinkDelay.getTimer() >= 0) {
+                    /// se a imagem estiver ligada e desligada
+                    /// se a imagem estiver desligada e ligada
+                    imageOn = !imageOn;
+                    //Reseta o contador
+                    blinkDelay.resetTimer();
+                    /// adiciona 1 ao contador de piscada
+                    //System.out.println("blick " + imageOn);
+                    //Caso o numero de piscadas for atingido o efeito acaba
+                    if (timesBlink >= 4) {
+                        blinkOn = false;
+                        imageOn = true;
+                        timesBlink = 0;
+                        //System.out.println("fim");
+                    }
+                }
+            }
+            else {
+                if (blinkDelay.getTimer() >= .2f) {
+                    /// se a imagem estiver ligada e desligada
+                    /// se a imagem estiver desligada e ligada
+                    imageOn = !imageOn;
+                    //Reseta o contador
+                    blinkDelay.resetTimer();
+                    /// adiciona 1 ao contador de piscadas
+                    timesBlink += 1;
+                    //System.out.println("blick " + imageOn);
+                    //Caso o numero de piscadas for atingido o efeito acaba
+                    if (timesBlink >= 4) {
+                        blinkOn = false;
+                        imageOn = true;
+                        timesBlink = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Liga o efeito de blink
+     */
+    public void blinkOn(){
+        blinkOn = true;
+    }
+    /**
+     * Liga a comeoracao do jogador
+     */
+    public void victoryOn(){
+        victory = true;
+        imageOn = true;
+    }
+    /**
+     * Indica se pode finalizar o estagio
+     */
+    public boolean isEnd() {
+        return end;
     }
 }

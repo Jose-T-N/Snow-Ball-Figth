@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -56,7 +57,7 @@ public abstract class PlayScreen implements Screen {
 	 * @param villageScenario tipo do "jogador".
 	 * Si true jogador do vilarejo se false jogador dos "estagio".
 	 * */
-	public PlayScreen(Main game,boolean villageScenario) {
+	public PlayScreen(Main game,boolean villageScenario,boolean stageInfo) {
 		// Objeto da classe principal
 		this.game = game;
 		// SpriteBatch
@@ -78,11 +79,13 @@ public abstract class PlayScreen implements Screen {
 		world = new World(new Vector2(0, 0), true);
 		world.setContactListener(new WorldContactListener());
 		b2dr = new Box2DDebugRenderer();
-		// Instanciando jogado
-		if(villageScenario)
-			this.player = new PlayerIcon(this);
-		else
-			this.player = new Player(this);
+        //Caso seja a informacao de estagio
+        if (!stageInfo)
+            // Instanciando jogado
+		    if(villageScenario)
+			    this.player = new PlayerIcon(this);
+            else
+                this.player = new Player(this);
 	}
 
 	@Override
@@ -211,5 +214,9 @@ public abstract class PlayScreen implements Screen {
 
     public ShapeRenderer getShape() {
         return shape;
+    }
+
+    public Main getGame() {
+        return game;
     }
 }

@@ -22,7 +22,7 @@ public abstract class Scenario extends PlayScreen  {
      * @param main Classe principal do core
      * */
     public Scenario(Texture scenario, Main main, boolean villageScenario) {
-    	super(main,villageScenario);
+    	super(main,villageScenario,false);
         //objeto PlayScreen
         this.scenario = scenario;
         this.width = Main.V_WIDTH/Main.PPM;
